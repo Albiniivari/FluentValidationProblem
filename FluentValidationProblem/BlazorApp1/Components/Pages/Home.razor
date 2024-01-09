@@ -1,0 +1,75 @@
+﻿@page "/"
+@using BlazorApp1.Components.Model
+@using MudBlazor
+@rendermode InteractiveServer
+<EditForm EditContext="_editContext">
+    <FluentValidationValidator/>
+    <ValidationSummary></ValidationSummary>
+    <MudInput  Label="Person name" @bind-Value="_person.Name"></MudInput>
+
+    <table>
+        <tr>
+            <th>Check</th>
+            <th>Name</th>
+            <th>Plate</th>
+            <th>Model</th>
+        </tr>
+
+        @foreach (var car in _allCars)
+        {
+            <tr>
+                <td>
+                    <input type="checkbox" checked="@_person.Cars.Contains(car)" @onclick="() => OnCarSelect(car)"/>
+                </td>
+                <td>
+                    @if (_person.Cars.Contains(car))
+                    {
+                        <MudInput @bind-Value="car.Name" @bind-Value:after="() => NameChanged(car)"></MudInput>
+                        <ValidationMessage For="() => car.Name"/>
+                    }
+                    else
+                    {
+                        @car.Name
+                    }
+                </td>
+                <td>@car.LicensePlate</td>
+                <td>@car.Model</td>
+            </tr>
+        }
+
+    </table>
+    <button type="submit">Skicka in</button>
+</EditForm>
+
+@code{
+    List<Car> _allCars = new();
+    Person _person = new();
+    private EditContext _editContext;
+
+    protected override void OnInitialized()
+    {
+        _person.Cars = new();
+        _editContext = new(_person);
+
+        _allCars.Add(new() { Name = "Testing1", LicensePlate = "1ABC", Model = "" });
+        _allCars.Add(new() { Name = "Testing2", LicensePlate = "2ABC", Model = "" });
+        _allCars.Add(new() { Name = "Testing3", LicensePlate = "3ABC", Model = "" });
+        _allCars.Add(new() { Name = "Testing4", LicensePlate = "4ABC", Model = "" });
+        _allCars.Add(new() { Name = "Testing5", LicensePlate = "5ABC", Model = "" });
+    }
+
+    private void OnCarSelect(Car car)
+    {
+        if (!_person.Cars.Add(car))
+        {
+            _person.Cars.Remove(car);
+            _editContext.NotifyFieldChanged(new FieldIdentifier(car, "Name"));
+            _editContext.NotifyFieldChanged(new FieldIdentifier(_person, "Cars"));
+        }
+    }
+    
+    private void NameChanged(Car car)
+    {
+        _editContext.NotifyFieldChanged(new FieldIdentifier(car, "Name"));
+    }
+}
