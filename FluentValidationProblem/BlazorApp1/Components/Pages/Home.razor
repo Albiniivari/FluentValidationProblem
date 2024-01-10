@@ -3,7 +3,7 @@
 @using MudBlazor
 @rendermode InteractiveServer
 <EditForm EditContext="_editContext">
-    <FluentValidationValidator/>
+    <FluentValidationValidator @ref="_fluentValidationValidator" />
     <ValidationSummary></ValidationSummary>
     <MudInput  Label="Person name" @bind-Value="_person.Name"></MudInput>
 
@@ -41,7 +41,9 @@
     <button type="submit">Skicka in</button>
 </EditForm>
 
-@code{
+@code {
+    private FluentValidationValidator? _fluentValidationValidator;
+
     List<Car> _allCars = new();
     Person _person = new();
     private EditContext _editContext;
@@ -65,9 +67,10 @@
             _person.Cars.Remove(car);
             _editContext.NotifyFieldChanged(new FieldIdentifier(car, "Name"));
             _editContext.NotifyFieldChanged(new FieldIdentifier(_person, "Cars"));
+            _fluentValidationValidator?.Validate();
         }
     }
-    
+
     private void NameChanged(Car car)
     {
         _editContext.NotifyFieldChanged(new FieldIdentifier(car, "Name"));
