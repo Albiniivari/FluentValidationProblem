@@ -1,11 +1,10 @@
 ﻿@page "/"
 @using BlazorApp1.Components.Model
-@using MudBlazor
 @rendermode InteractiveServer
-<EditForm EditContext="_editContext">
-    <FluentValidationValidator/>
+<EditForm EditContext="_editContext" OnValidSubmit="@SubmitValidForm">
+    <FluentValidationValidator @ref="_fluentValidationValidator" Options="options => options.IncludeAllRuleSets()"/>
     <ValidationSummary></ValidationSummary>
-    <MudInput  Label="Person name" @bind-Value="_person.Name"></MudInput>
+    <MudInput Label="Person name" @bind-Value="_person.Name"></MudInput>
 
     <table>
         <tr>
@@ -45,6 +44,7 @@
     List<Car> _allCars = new();
     Person _person = new();
     private EditContext _editContext;
+    private FluentValidationValidator? _fluentValidationValidator;
 
     protected override void OnInitialized()
     {
@@ -63,13 +63,20 @@
         if (!_person.Cars.Add(car))
         {
             _person.Cars.Remove(car);
-            _editContext.NotifyFieldChanged(new FieldIdentifier(car, "Name"));
             _editContext.NotifyFieldChanged(new FieldIdentifier(_person, "Cars"));
         }
+
+        var validation = _fluentValidationValidator?.Validate(options => options.IncludeRuleSets("Cars"));
     }
-    
+
     private void NameChanged(Car car)
     {
         _editContext.NotifyFieldChanged(new FieldIdentifier(car, "Name"));
     }
+
+    private void SubmitValidForm(EditContext obj)
+    {
+        Console.WriteLine("Valid submit!");
+    }
+
 }

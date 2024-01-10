@@ -13,6 +13,10 @@ public class PersonValidator : AbstractValidator<Person>
             .NotEmpty()
             .WithMessage("Must have a name");
         // Lägenheterna ska använda en egen Validator.
-        RuleForEach(x => x.Cars).SetValidator(new CarValidator());
+        RuleSet("Cars", () =>
+        {
+            RuleForEach(x => x.Cars).SetValidator(new CarValidator());
+            RuleFor(x => x.Cars).NotEmpty().WithMessage("At least 1 car has to be selected.");
+        });
     }
 }
